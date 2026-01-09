@@ -260,8 +260,9 @@
                 <p class="font-semibold text-foreground text-sm">{{ session('user.name') ?? 'Dr. Sarah Johnson' }}</p>
                 <p class="text-secondary text-xs">Dokter Umum</p>
               </div>
-              <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop" alt="Profile"
-                class="size-11 rounded-full object-cover ring-2 ring-border">
+              <div class="size-11 rounded-full object-cover ring-2 ring-border bg-primary/10 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="user" class="lucide lucide-user size-6 text-primary"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
             </div>
           </div>
         </div>

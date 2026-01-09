@@ -27,20 +27,7 @@
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-  <!-- Pembayaran Hari Ini -->
-  <div class="flex flex-col rounded-2xl border border-border p-6 gap-3 bg-white">
-    <div class="flex items-center gap-[6px]">
-      <div class="size-11 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
-        <i data-lucide="credit-card" class="size-6 text-primary"></i>
-      </div>
-      <p class="font-medium text-secondary">Pembayaran Hari Ini</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <p class="font-bold text-[32px] leading-10">18</p>
-      <span class="text-success text-sm font-semibold">+3</span>
-    </div>
-  </div>
-
+  
   <!-- Resep Hari Ini -->
   <div class="flex flex-col rounded-2xl border border-border p-6 gap-3 bg-white">
     <div class="flex items-center gap-[6px]">
@@ -55,8 +42,8 @@
   <!-- Pasien Aktif -->
   <div class="flex flex-col rounded-2xl border border-border p-6 gap-3 bg-white">
     <div class="flex items-center gap-[6px]">
-      <div class="size-11 bg-success/10 rounded-xl flex items-center justify-center shrink-0">
-        <i data-lucide="users" class="size-6 text-success"></i>
+      <div class="size-11 bg-warning/10 rounded-xl flex items-center justify-center shrink-0">
+        <i data-lucide="users" class="size-6 text-warning"></i>
       </div>
       <p class="font-medium text-secondary">Pasien Aktif</p>
     </div>
@@ -66,13 +53,28 @@
   <!-- Stok Obat Rendah -->
   <div class="flex flex-col rounded-2xl border border-border p-6 gap-3 bg-white">
     <div class="flex items-center gap-[6px]">
-      <div class="size-11 bg-warning/10 rounded-xl flex items-center justify-center shrink-0">
-        <i data-lucide="package" class="size-6 text-warning-dark"></i>
+      <!-- Versi dengan warna danger/red -->
+      <div class="size-11 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+        <i data-lucide="package" class="size-6 text-red-600"></i>
       </div>
       <p class="font-medium text-secondary">Stok Obat</p>
     </div>
     <div class="flex items-center gap-3">
       <p class="font-bold text-[32px] leading-10">7</p>
+    </div>
+  </div>
+
+  <!-- Pembayaran Hari Ini -->
+  <div class="flex flex-col rounded-2xl border border-border p-6 gap-3 bg-white">
+    <div class="flex items-center gap-[6px]">
+      <div class="size-11 bg-success/10 rounded-xl flex items-center justify-center shrink-0">
+        <i data-lucide="credit-card" class="size-6 text-success"></i>
+      </div>
+      <p class="font-medium text-secondary">Pembayaran Hari Ini</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <p class="font-bold text-[32px] leading-10">18</p>
+      <span class="text-success text-sm font-semibold">+3</span>
     </div>
   </div>
 </div>
@@ -81,20 +83,12 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
   <!-- Tren Resep -->
   <div class="flex flex-col rounded-2xl border border-border p-6 gap-6 bg-white">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="flex flex-col gap-3">
-        <div class="flex items-center gap-[6px]">
-          <div class="size-11 bg-info/10 rounded-xl flex items-center justify-center shrink-0">
-            <i data-lucide="trending-up" class="size-6 text-info"></i>
-          </div>
-          <p class="font-medium text-secondary">Tren Resep</p>
-        </div>
-        <p class="font-bold text-[32px] leading-10">24.5</p>
-      </div>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <h3 class="font-bold text-lg text-foreground">Grafik Resep</h3>
       <button
-        class="flex items-center rounded-3xl border border-border py-3 px-4 gap-2 bg-primary/10 w-fit cursor-pointer hover:bg-primary/20 transition-all duration-300">
-        <i data-lucide="calendar" class="size-5 text-primary"></i>
-        <p class="font-medium text-sm text-primary">7 Hari Terakhir</p>
+        class="flex items-center rounded-3xl border border-border py-2 px-4 gap-2 bg-primary/10 w-fit cursor-pointer">
+        {{-- <i data-lucide="pie-chart" class="size-4 text-primary"></i> --}}
+        <p class="font-medium text-sm text-primary">2026</p>
       </button>
     </div>
     <div class="w-full overflow-x-auto">
@@ -123,7 +117,7 @@
 </div>
 
 <!-- Alerts Section -->
-<div class="flex flex-col rounded-2xl border border-border p-6 gap-4 bg-white">
+<div class="flex flex-col rounded-2xl border border-border p-6 gap-4 bg-white" style="display: none">
   <h3 class="font-bold text-lg text-foreground">Peringatan Medis</h3>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="p-4 bg-error-light rounded-card border-l-4 border-error">
