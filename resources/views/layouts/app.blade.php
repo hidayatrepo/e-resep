@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title', 'E-Resep - Sistem E-Resep Dokter')</title>
+  <link rel="icon" type="image/png" href="{{ asset('logo.png') }}" />
   <meta name="description" content="E-Resep dashboard untuk mengelola resep elektronik dan data pasien.">
   <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
