@@ -54,8 +54,8 @@
   <div class="flex flex-col rounded-2xl border border-border p-6 gap-3 bg-white">
     <div class="flex items-center gap-[6px]">
       <!-- Versi dengan warna danger/red -->
-      <div class="size-11 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
-        <i data-lucide="package" class="size-6 text-red-600"></i>
+      <div class="size-11 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+        <i data-lucide="package" class="size-6 text-primary/50"></i>
       </div>
       <p class="font-medium text-secondary">Stok Obat</p>
     </div>
