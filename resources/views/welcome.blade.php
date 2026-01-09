@@ -101,28 +101,32 @@
 <body class="font-sans bg-gray-50 min-h-screen overflow-x-hidden">
 
 <!-- Login Screen -->
-<div id="login-screen" class="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-6">
-  <div class="w-full max-w-md">
-    <div class="text-center mb-8">
-      <div class="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <i data-lucide="stethoscope" class="w-8 h-8 text-white"></i>
+<div id="login-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center p-4">
+  <div class="max-w-md w-full">
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="stethoscope" class="w-10 h-10 text-primary"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">E-Resep</h1>
+        <p class="text-gray-600">Sistem E-Resep Digital
       </div>
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">E-Resep</h1>
-      <p class="text-gray-600">Sistem E-Resep Digital untuk Dokter</p>
-    </div>
 
-    <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
-      <h2 class="text-xl font-bold text-gray-900 mb-6 text-center">Masuk ke Akun Anda</h2>
-      
+      <div id="login-message" class="mb-4 hidden p-4 rounded-xl"></div>
+
       <form id="login-form" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Email / Username</label>
-          <input type="text" id="username" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="dokter@email.com" required>
+          <input type="text" id="username" required 
+                 class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                 placeholder="dokter@email.com">
         </div>
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-          <input type="password" id="password" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="••••••••" required>
+          <input type="password" id="password" required 
+                 class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                 placeholder="••••••••">
         </div>
         
         <div class="flex items-center justify-between">
@@ -133,8 +137,10 @@
           <a href="#" class="text-sm text-primary hover:underline">Lupa password?</a>
         </div>
         
-        <button type="submit" class="w-full mt-6 px-4 py-3 bg-primary text-white rounded-button font-medium hover:bg-primary-hover transition-all duration-200 cursor-pointer">
-          Masuk
+        <button type="submit" id="login-btn"
+                class="w-full mt-6 px-4 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary-hover transition-all duration-200 cursor-pointer flex items-center justify-center">
+          <span>Masuk</span>
+          <div id="login-spinner" class="hidden animate-spin ml-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
         </button>
       </form>
       
@@ -144,10 +150,10 @@
           <a href="#" class="text-primary font-medium hover:underline">Hubungi administrator</a>
         </p>
       </div>
-    </div>
-    
-    <div class="mt-6 text-center">
-      <p class="text-xs text-gray-500">© 2024 E-Resep. Hak cipta dilindungi undang-undang.</p>
+
+      <div class="mt-6 text-center">
+        <p class="text-xs text-gray-500">© 2026 E-Resep. undang-undang.</p>
+      </div>
     </div>
   </div>
 </div>
