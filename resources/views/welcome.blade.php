@@ -175,7 +175,7 @@
           <div class="flex items-center gap-3">
 
             <div
-              class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
+              class="w-12 h-12 bg-gradient-to-br from-blue-700 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
               <i data-lucide="stethoscope" class="w-7 h-7 text-white"></i>
             </div>
             <h1 class="font-semibold text-xl">E-Resep</h1>
