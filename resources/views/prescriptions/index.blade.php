@@ -184,7 +184,7 @@
           <!-- Medicine rows will be added here -->
         </div>
         <div class="mt-4">
-          <button type="button" onclick="addMedicineRow()" class="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-hover transition-all">
+          <button type="button" onclick="addMedicineRow()" class="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-hover transition-all cursor-pointer" style="width: 100%;background:transparent;color:#0443A8;border:1px solid #0443A8">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Tambah Obat
           </button>
@@ -895,12 +895,12 @@
           placeholder="0" min="0" step="100" value="${medicineData ? medicineData.unit_price : '0'}">
       </div>
       ${isFirst ? `
-        <button type="button" onclick="addMedicineRow()" class="p-2 bg-primary hover:bg-primary-hover text-white rounded-full transition-all mb-2">
-          <i data-lucide="plus" class="w-4 h-4"></i>
+        <button type="button" onclick="removeMedicineRow('${rowId}')" class="p-2 bg-error hover:bg-error-dark text-white rounded-full transition-all mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" class="lucide lucide-trash-2 w-4 h-4"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
       ` : `
         <button type="button" onclick="removeMedicineRow('${rowId}')" class="p-2 bg-error hover:bg-error-dark text-white rounded-full transition-all mb-2">
-          <i data-lucide="trash-2" class="w-4 h-4"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" class="lucide lucide-trash-2 w-4 h-4"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
       `}
     `;

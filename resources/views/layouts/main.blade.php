@@ -153,7 +153,7 @@
                 </div>
               </a>
               <!-- Pasien -->
-              <a href="{{ route('patients.index') }}" class="group @if(request()->routeIs('patients.*')) active @endif cursor-pointer">
+              <a href="{{ route('patients.index') }}" class="group @if(request()->routeIs('patients.*')) active @endif cursor-pointer" style="display: none">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
                   <i data-lucide="users"
@@ -163,7 +163,7 @@
                 </div>
               </a>
               <!-- Obat -->
-              <a href="{{ route('medications.index') }}" class="group @if(request()->routeIs('medications.*')) active @endif cursor-pointer">
+              <a href="{{ route('medications.index') }}" class="group @if(request()->routeIs('medications.*')) active @endif cursor-pointer" style="display: none">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
                   <i data-lucide="pill"
