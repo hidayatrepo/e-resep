@@ -12,9 +12,9 @@
   </div>
   <div class="flex items-center gap-2 md:gap-3">
     <button onclick="exportReport()"
-      class="flex items-center gap-2 px-4 py-2.5 ring-1 ring-border hover:ring-primary rounded-lg text-foreground font-medium transition-all duration-200 cursor-pointer">
+      class="flex items-center gap-2 px-4 py-2.5 ring-1 ring-border hover:ring-primary rounded-button text-foreground font-medium transition-all duration-200 cursor-pointer">
       <i data-lucide="download" class="w-4 h-4"></i>
-      <span>Ekspor Laporan</span>
+      <span>Ekspor Data</span>
     </button>
     <button onclick="openModal('add')"
       class="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-all duration-200 cursor-pointer">
