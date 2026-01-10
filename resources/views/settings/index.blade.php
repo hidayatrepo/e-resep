@@ -17,10 +17,10 @@
     <div class="flex items-start justify-between mb-8 pb-6 border-b border-border">
       <h2 class="text-2xl font-bold text-foreground">Pengaturan Aplikasi</h2>
       <div class="flex gap-3">
-        <button type="reset" class="flex items-center gap-2 px-6 py-2.5 ring-1 ring-border text-foreground rounded-lg font-medium hover:bg-muted transition-all whitespace-nowrap">
+        <button type="reset" class="rounded-2xl flex items-center gap-2 px-6 py-2.5 ring-1 ring-border text-foreground font-medium hover:bg-muted transition-all whitespace-nowrap">
           Batal
         </button>
-        <button type="submit" class="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-all whitespace-nowrap">
+        <button type="submit" class="rounded-2xl flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-medium hover:bg-primary-hover transition-all whitespace-nowrap">
           <i data-lucide="save" class="w-4 h-4"></i>
           Simpan
         </button>
