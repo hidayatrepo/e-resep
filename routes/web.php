@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\CheckAuthenticated;
 
 // Redirect root to login
@@ -65,5 +66,24 @@ Route::middleware([CheckAuthenticated::class])->group(function () {
         // 4. DELETE - Hapus
         Route::post('/prescriptions/delete', [PrescriptionController::class, 'delete']);
     });
+
+        
+    // API Routes for payments
+    Route::middleware([CheckAuthenticated::class])->prefix('api')->group(function () {
+        // GET - Ambil data pembayaran
+        Route::post('/payments/get', [PaymentController::class, 'get']);
+        
+        // UPDATE - Proses pembayaran
+        Route::post('/payments/update', [PaymentController::class, 'update']);
+        
+        // CANCEL - Batalkan pembayaran
+        Route::post('/payments/cancel', [PaymentController::class, 'cancel']);
+        
+        // STATISTICS - Statistik pembayaran
+        Route::get('/payments/statistics', [PaymentController::class, 'statistics']);
+        
+        // INVOICE - Cetak invoice PDF
+        Route::get('/payments/invoice/{id}/pdf', [PaymentController::class, 'generateInvoice'])->name('payments.invoice');
+    });    
 
 });
