@@ -204,28 +204,25 @@ class PaymentController extends Controller
             }
 
             if ($payment->payment_status !== 'paid') {
-                abort(400, 'Pembayaran belum diproses');
+                abort(400, 'Hanya pembayaran yang sudah diproses yang bisa dicetak');
             }
 
             $data = [
                 'prescription' => $payment,
-                'items' => $payment->items,
-                'receipt_number' => $payment->receipt_number,
+                'items' => $payment->items ?? [],
+                'receipt_number' => $payment->receipt_number ?? 'INV-' . date('Ymd') . '-' . str_pad($payment->id, 5, '0', STR_PAD_LEFT),
                 'print_date' => now()->format('d F Y H:i'),
-                'pharmacist' => auth()->user()->name ?? 'Apoteker'
+                'pharmacist' => auth()->user()->name ?? session('user.name') ?? 'Apoteker'
             ];
 
-            return response()->json([
-                'success' => true,
-                'data' => $data,
-                'message' => 'Fitur cetak PDF akan tersedia setelah install DomPDF'
-            ]);
+            // Langsung return view (HTML)
+            return view('payments.invoice-pdf', $data);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghasilkan invoice: ' . $e->getMessage()
-            ], 500);
+            // Return error page
+            return view('payments.invoice-error', [
+                'message' => 'Gagal memuat data invoice: ' . $e->getMessage()
+            ]);
         }
     }
 }

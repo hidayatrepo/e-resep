@@ -252,6 +252,155 @@
   </div>
 </div>
 
+<!-- View Payment Detail Modal -->
+<div id="viewPaymentModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-white">
+      <h2 id="viewModalTitle" class="text-2xl font-bold text-foreground">Detail Pembayaran</h2>
+      <div class="flex items-center gap-2">
+        <button onclick="printInvoice(currentViewPaymentId)" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Cetak</span>
+        </button>
+        <button onclick="closeViewModal()" class="text-secondary hover:text-foreground transition-all ml-2">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-6">
+      <!-- Header Info -->
+      <div class="flex justify-between items-start border-b border-border pb-4">
+        <div>
+          <h3 class="text-lg font-bold text-foreground mb-1" id="viewPatientName">-</h3>
+          <p class="text-sm text-secondary" id="viewPrescriptionNumber">-</p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-secondary">No. Resi</p>
+          <p class="text-lg font-bold text-primary" id="viewReceiptNumber">-</p>
+        </div>
+      </div>
+
+      <!-- Prescription Info -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-secondary mb-1">Dokter</p>
+          <p class="text-base font-medium text-foreground" id="viewDoctorName">-</p>
+        </div>
+        <div>
+          <p class="text-sm text-secondary mb-1">Tanggal Pemeriksaan</p>
+          <p class="text-base font-medium text-foreground" id="viewExaminationDate">-</p>
+        </div>
+        <div>
+          <p class="text-sm text-secondary mb-1">Apoteker</p>
+          <p class="text-base font-medium text-foreground" id="viewPharmacistName">-</p>
+        </div>
+        <div>
+          <p class="text-sm text-secondary mb-1">Tanggal Dilayani</p>
+          <p class="text-base font-medium text-foreground" id="viewServedAt">-</p>
+        </div>
+      </div>
+
+      <!-- Medicine Items -->
+      <div class="border border-border rounded-xl overflow-hidden">
+        <div class="bg-gray-50 px-4 py-3 border-b border-border">
+          <h3 class="text-lg font-semibold text-foreground">Daftar Obat</h3>
+        </div>
+        <div class="p-4">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-border">
+                <th class="text-left text-sm font-medium text-secondary pb-2">No.</th>
+                <th class="text-left text-sm font-medium text-secondary pb-2">Nama Obat</th>
+                <th class="text-right text-sm font-medium text-secondary pb-2">Jumlah</th>
+                <th class="text-right text-sm font-medium text-secondary pb-2">Harga</th>
+                <th class="text-right text-sm font-medium text-secondary pb-2">Total</th>
+              </tr>
+            </thead>
+            <tbody id="viewMedicineList">
+              <!-- Medicine items will be populated -->
+            </tbody>
+            <tfoot>
+              <tr class="border-t border-border">
+                <td colspan="4" class="text-right text-sm font-medium text-foreground pt-3">Total Tagihan:</td>
+                <td class="text-right text-lg font-bold text-primary pt-3" id="viewTotalPrice">Rp 0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payment Details -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-foreground">Detail Pembayaran</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm text-secondary mb-1">Status Pembayaran</p>
+            <div id="viewPaymentStatus">-</div>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">Metode Pembayaran</p>
+            <p class="text-base font-medium text-foreground" id="viewPaymentMethod">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">Jumlah Dibayar</p>
+            <p class="text-base font-medium text-foreground" id="viewPaymentAmount">Rp 0</p>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">No. Referensi</p>
+            <p class="text-base font-medium text-foreground" id="viewPaymentReference">-</p>
+          </div>
+          <div class="md:col-span-2">
+            <p class="text-sm text-secondary mb-1">Catatan Pembayaran</p>
+            <p class="text-base font-medium text-foreground" id="viewPaymentNotes">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Examination Details -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-foreground">Data Pemeriksaan</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div>
+            <p class="text-sm text-secondary mb-1">Tinggi Badan</p>
+            <p class="text-base font-medium text-foreground" id="viewHeight">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">Berat Badan</p>
+            <p class="text-base font-medium text-foreground" id="viewWeight">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">Tekanan Darah</p>
+            <p class="text-base font-medium text-foreground" id="viewBloodPressure">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">Denyut Jantung</p>
+            <p class="text-base font-medium text-foreground" id="viewHeartRate">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">Laju Pernapasan</p>
+            <p class="text-base font-medium text-foreground" id="viewRespirationRate">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-secondary mb-1">Suhu Tubuh</p>
+            <p class="text-base font-medium text-foreground" id="viewTemperature">-</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm text-secondary mb-1">Hasil Pemeriksaan</p>
+          <p class="text-base font-medium text-foreground" id="viewExaminationResult">-</p>
+        </div>
+        <div>
+          <p class="text-sm text-secondary mb-1">Catatan Dokter</p>
+          <p class="text-base font-medium text-foreground" id="viewDoctorNotes">-</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 @push('styles')
 <style>
   /* Payment Status Badges */
@@ -285,20 +434,24 @@
   }
 
   /* Custom scrollbar */
-  #paymentModal .overflow-y-auto {
+  #paymentModal .overflow-y-auto,
+  #viewPaymentModal .overflow-y-auto {
     scrollbar-width: thin;
     scrollbar-color: #CBD5E1 #F1F5F9;
   }
   
-  #paymentModal .overflow-y-auto::-webkit-scrollbar {
+  #paymentModal .overflow-y-auto::-webkit-scrollbar,
+  #viewPaymentModal .overflow-y-auto::-webkit-scrollbar {
     width: 6px;
   }
   
-  #paymentModal .overflow-y-auto::-webkit-scrollbar-track {
+  #paymentModal .overflow-y-auto::-webkit-scrollbar-track,
+  #viewPaymentModal .overflow-y-auto::-webkit-scrollbar-track {
     background: #F1F5F9;
   }
   
-  #paymentModal .overflow-y-auto::-webkit-scrollbar-thumb {
+  #paymentModal .overflow-y-auto::-webkit-scrollbar-thumb,
+  #viewPaymentModal .overflow-y-auto::-webkit-scrollbar-thumb {
     background-color: #CBD5E1;
     border-radius: 3px;
   }
@@ -312,6 +465,7 @@
   let totalPages = 1;
   let totalRecords = 0;
   let currentPaymentId = null;
+  let currentViewPaymentId = null;
   
   // Session user data from PHP
   const sessionUser = @json(session('user') ?? []);
@@ -500,7 +654,7 @@
               Sudah Dibayar
             </span>
           `;
-          canView = isPharmacist || isAdmin;
+          canView = true; // Semua bisa lihat detail pembayaran yang sudah selesai
           canPrint = isPharmacist || isAdmin;
           break;
         case 'cancelled':
@@ -786,6 +940,170 @@
     form.reset();
   }
 
+  // =============== VIEW PAYMENT DETAIL ===============
+  async function viewPayment(id) {
+    try {
+      currentViewPaymentId = id;
+      
+      // Load payment data
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                       document.querySelector('input[name="_token"]')?.value ||
+                       '{{ csrf_token() }}';
+      
+      const response = await fetch('/api/payments/get', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ id: id })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        populateViewModal(result.data);
+        
+        // Show modal
+        const modal = document.getElementById('viewPaymentModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        lucide.createIcons();
+      } else {
+        showAlert('error', 'Gagal memuat data pembayaran');
+      }
+    } catch (error) {
+      console.error('Error viewing payment:', error);
+      showAlert('error', 'Terjadi kesalahan saat memuat data');
+    }
+  }
+
+  function populateViewModal(data) {
+    // Set basic info
+    document.getElementById('viewPatientName').textContent = data.patient_name || '-';
+    document.getElementById('viewPrescriptionNumber').textContent = data.prescription_number || '-';
+    document.getElementById('viewReceiptNumber').textContent = data.receipt_number || '-';
+    document.getElementById('viewDoctorName').textContent = data.doctor_name || '-';
+    document.getElementById('viewPharmacistName').textContent = data.pharmacist_name || currentUserName;
+    
+    // Format dates
+    if (data.examination_date) {
+      const examDate = new Date(data.examination_date);
+      const formattedExamDate = examDate.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      document.getElementById('viewExaminationDate').textContent = formattedExamDate;
+    } else {
+      document.getElementById('viewExaminationDate').textContent = '-';
+    }
+    
+    if (data.served_at) {
+      const servedDate = new Date(data.served_at);
+      const formattedServedDate = servedDate.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      document.getElementById('viewServedAt').textContent = formattedServedDate;
+    } else {
+      document.getElementById('viewServedAt').textContent = '-';
+    }
+    
+    // Set payment status badge
+    let paymentStatusBadge = '';
+    switch(data.payment_status) {
+      case 'pending':
+        paymentStatusBadge = '<span class="payment-badge-pending"><i data-lucide="clock" class="w-4 h-4"></i> Belum Dibayar</span>';
+        break;
+      case 'paid':
+        paymentStatusBadge = '<span class="payment-badge-paid"><i data-lucide="check-circle" class="w-4 h-4"></i> Sudah Dibayar</span>';
+        break;
+      case 'cancelled':
+        paymentStatusBadge = '<span class="payment-badge-cancelled"><i data-lucide="x-circle" class="w-4 h-4"></i> Dibatalkan</span>';
+        break;
+      default:
+        paymentStatusBadge = data.payment_status || '-';
+    }
+    document.getElementById('viewPaymentStatus').innerHTML = paymentStatusBadge;
+    
+    // Set payment details
+    document.getElementById('viewPaymentMethod').textContent = formatPaymentMethod(data.payment_method);
+    document.getElementById('viewPaymentAmount').textContent = data.payment_amount ? 
+      `Rp ${parseInt(data.payment_amount).toLocaleString('id-ID')}` : 'Rp 0';
+    document.getElementById('viewPaymentReference').textContent = data.payment_reference || '-';
+    document.getElementById('viewPaymentNotes').textContent = data.payment_notes || '-';
+    
+    // Set examination details
+    document.getElementById('viewHeight').textContent = data.height ? `${data.height} cm` : '-';
+    document.getElementById('viewWeight').textContent = data.weight ? `${data.weight} kg` : '-';
+    document.getElementById('viewBloodPressure').textContent = data.systole && data.diastole ? 
+      `${data.systole}/${data.diastole} mmHg` : '-';
+    document.getElementById('viewHeartRate').textContent = data.heart_rate ? `${data.heart_rate} bpm` : '-';
+    document.getElementById('viewRespirationRate').textContent = data.respiration_rate ? `${data.respiration_rate} rpm` : '-';
+    document.getElementById('viewTemperature').textContent = data.temperature ? `${data.temperature} °C` : '-';
+    document.getElementById('viewExaminationResult').textContent = data.examination_result || '-';
+    document.getElementById('viewDoctorNotes').textContent = data.notes || '-';
+    
+    // Load medicine items
+    const medicineList = document.getElementById('viewMedicineList');
+    medicineList.innerHTML = '';
+    
+    if (data.items && data.items.length > 0) {
+      let total = 0;
+      data.items.forEach((item, index) => {
+        const itemTotal = item.quantity * item.unit_price;
+        total += itemTotal;
+        
+        medicineList.innerHTML += `
+          <tr class="${index < data.items.length - 1 ? 'border-b border-border' : ''}">
+            <td class="py-2 text-sm text-secondary">${index + 1}</td>
+            <td class="py-2 text-sm text-secondary">${item.medicine_name || '-'}</td>
+            <td class="py-2 text-sm text-secondary text-right">${item.quantity || 0} ${item.unit || 'pcs'}</td>
+            <td class="py-2 text-sm text-secondary text-right">Rp ${parseInt(item.unit_price || 0).toLocaleString('id-ID')}</td>
+            <td class="py-2 text-sm font-medium text-foreground text-right">Rp ${parseInt(itemTotal).toLocaleString('id-ID')}</td>
+          </tr>
+        `;
+      });
+      
+      // Set total price
+      document.getElementById('viewTotalPrice').textContent = `Rp ${parseInt(total).toLocaleString('id-ID')}`;
+    } else {
+      medicineList.innerHTML = `
+        <tr>
+          <td colspan="5" class="py-4 text-center text-sm text-secondary">Tidak ada obat</td>
+        </tr>
+      `;
+      document.getElementById('viewTotalPrice').textContent = 'Rp 0';
+    }
+  }
+
+  function formatPaymentMethod(method) {
+    const methods = {
+      'cash': 'Tunai',
+      'debit_card': 'Kartu Debit',
+      'credit_card': 'Kartu Kredit',
+      'qris': 'QRIS',
+      'transfer': 'Transfer Bank'
+    };
+    return methods[method] || method || '-';
+  }
+
+  function closeViewModal() {
+    const modal = document.getElementById('viewPaymentModal');
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+
   // =============== PAYMENT FORM ===============
   function setupPaymentForm() {
     const form = document.getElementById('paymentForm');
@@ -878,15 +1196,6 @@
   }
 
   // =============== PAYMENT ACTIONS ===============
-  async function viewPayment(id) {
-    try {
-      showAlert('info', 'Fitur detail pembayaran akan segera tersedia');
-    } catch (error) {
-      console.error('Error viewing payment:', error);
-      showAlert('error', 'Terjadi kesalahan saat membuka detail');
-    }
-  }
-
   async function printInvoice(id) {
     try {
       // Cek permission untuk apoteker dan admin
@@ -1063,6 +1372,7 @@
   window.openPaymentModal = openPaymentModal;
   window.closeModal = closeModal;
   window.viewPayment = viewPayment;
+  window.closeViewModal = closeViewModal;
   window.printInvoice = printInvoice;
   window.cancelPayment = cancelPayment;
   window.exportReport = exportReport;
