@@ -62,13 +62,13 @@ ____________________________
 Gunakan akun ini untuk login setelah instalasi:
 
 Dokter
-Email: dokter@eresep.com
+Username: dokter
 Password: password123
 
 Apoteker
-Email: apoteker@eresep.com
+Username: apoteker
 Password: password123
 
 Administrator
-Email: admin@eresep.com
+Username: admin
 Password: admin123
