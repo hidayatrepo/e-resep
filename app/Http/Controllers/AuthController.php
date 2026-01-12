@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     public function showLogin()
     {
-        // Jika sudah login, redirect ke dashboard
+        // Jika sudah login, redirect ke dashboard berdasarkan role
         if (session('user')) {
-            return redirect()->route('dashboard');
+            return $this->redirectByRole(session('user')['role']);
         }
         return view('auth.login');
     }
@@ -22,20 +24,39 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Demo authentication - ganti dengan database query di production
-        if ($credentials['username'] === 'admin' && $credentials['password'] === 'password') {
+        // Cari user berdasarkan username atau email
+        $user = DB::table('users')
+            ->where(function($query) use ($credentials) {
+                $query->where('username', $credentials['username'])
+                      ->orWhere('email', $credentials['username']);
+            })
+            ->first();
+
+        // Cek user dan password
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Cek apakah user aktif
+            if (!$user->is_active) {
+                return back()->withErrors([
+                    'username' => 'Akun Anda dinonaktifkan. Silakan hubungi administrator.',
+                ])->onlyInput('username');
+            }
+
             // Simpan user ke session
             session([
                 'user' => [
-                    'id' => 1,
-                    'name' => 'Dr. Rochmad',
-                    'email' => 'admin@eresep.com',
-                    'username' => 'admin'
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'username' => $user->username,
+                    'role' => $user->role,
+                    'specialization' => $user->specialization,
+                    'phone' => $user->phone
                 ],
                 'authenticated' => true
             ]);
-            
-            return redirect()->route('dashboard')->with('success', 'Berhasil login!');
+
+            // Redirect berdasarkan role
+            return $this->redirectByRole($user->role)->with('success', 'Berhasil login!');
         }
 
         return back()->withErrors([
@@ -50,5 +71,18 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         
         return redirect()->route('login')->with('success', 'Berhasil logout!');
+    }
+
+    /**
+     * Redirect berdasarkan role user
+     */
+    private function redirectByRole($role)
+    {
+        return match($role) {
+            'doctor' => redirect()->route('dashboard'),
+            'pharmacist' => redirect()->route('payments.index'),
+            'admin' => redirect()->route('dashboard'),
+            default => redirect()->route('login'),
+        };
     }
 }

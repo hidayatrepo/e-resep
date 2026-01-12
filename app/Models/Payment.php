@@ -109,7 +109,8 @@ class Payment extends Model
                 'payment_method' => $data['payment_method'],
                 'payment_reference' => $data['payment_reference'] ?? $receiptNumber,
                 'payment_notes' => $data['payment_notes'] ?? null,
-                'pharmacist_name' => auth()->user()->name ?? 'Apoteker',
+                // 'pharmacist_name' => auth()->user()->name ?? 'Apoteker',
+                'pharmacist_name' => $data['pharmacist_name'],
                 'served_at' => now(),
                 'status' => 'completed', // Set status jadi completed setelah bayar
                 'updated_at' => now()

@@ -20,7 +20,7 @@
 </div>
 
 <!-- Statistics Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
   <div class="rounded-2xl border border-border p-6 bg-white">
     <div class="flex items-center gap-3 mb-2">
       <i data-lucide="credit-card" class="w-5 h-5 text-primary"></i>
@@ -43,6 +43,14 @@
       <p class="text-sm text-secondary">Sudah Dibayar</p>
     </div>
     <p class="text-2xl font-bold text-success" id="paidCount">0 Transaksi</p>
+  </div>
+  
+  <div class="rounded-2xl border border-border p-6 bg-white">
+    <div class="flex items-center gap-3 mb-2">
+      <i data-lucide="user-check" class="w-5 h-5 text-info"></i>
+      <p class="text-sm text-secondary">Apoteker Aktif</p>
+    </div>
+    <p class="text-2xl font-bold text-info-dark" id="pharmacistName">{{ session('user.name') ?? 'Apoteker' }}</p>
   </div>
 </div>
 
@@ -88,6 +96,8 @@
         <tr class="border-b border-border bg-muted">
           <th class="px-6 py-4 text-left text-sm font-semibold text-foreground">No. Resep</th>
           <th class="px-6 py-4 text-left text-sm font-semibold text-foreground">Nama Pasien</th>
+          <th class="px-6 py-4 text-left text-sm font-semibold text-foreground">Dokter</th>
+          <th class="px-6 py-4 text-left text-sm font-semibold text-foreground">Apoteker</th>
           <th class="px-6 py-4 text-left text-sm font-semibold text-foreground">Tanggal</th>
           <th class="px-6 py-4 text-left text-sm font-semibold text-foreground">Status Resep</th>
           <th class="px-6 py-4 text-right text-sm font-semibold text-foreground">Total Biaya</th>
@@ -133,6 +143,8 @@
     <form id="paymentForm" class="p-6 space-y-6">
       @csrf
       <input type="hidden" id="paymentId">
+      <input type="hidden" id="pharmacistName" value="{{ session('user.name') ?? 'Apoteker' }}">
+      <input type="hidden" id="pharmacistId" value="{{ session('user.id') ?? '' }}">
       
       <!-- Prescription Info -->
       <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -153,6 +165,10 @@
           <div>
             <p class="text-sm text-blue-700 mb-1">Tanggal</p>
             <p class="text-base font-medium text-blue-900" id="modalExaminationDate">-</p>
+          </div>
+          <div>
+            <p class="text-sm text-blue-700 mb-1">Apoteker</p>
+            <p class="text-base font-medium text-blue-900" id="modalPharmacistName">{{ session('user.name') ?? 'Apoteker' }}</p>
           </div>
         </div>
       </div>
@@ -191,7 +207,7 @@
         
         <div>
           <label class="block text-sm font-medium text-foreground mb-2">Jumlah Dibayar *</label>
-          <input type="number" id="paymentAmount" name="payment_amount" placeholder="0" min="0" step="100"
+          <input type="number" id="paymentAmount" name="payment_amount" placeholder="0" min="0"
             class="w-full px-4 py-3 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-right text-lg font-medium">
           <p class="text-xs text-secondary mt-1">Tagihan: <span id="billAmount" class="font-medium">Rp 0</span></p>
           <p class="text-xs" id="changeAmount">Kembalian: <span class="font-medium">Rp 0</span></p>
@@ -296,6 +312,12 @@
   let totalPages = 1;
   let totalRecords = 0;
   let currentPaymentId = null;
+  
+  // Session user data from PHP
+  const sessionUser = @json(session('user') ?? []);
+  const currentUserId = sessionUser?.id || 0;
+  const currentUserRole = sessionUser?.role || '';
+  const currentUserName = sessionUser?.name || 'Apoteker';
 
   // =============== INITIALIZATION ===============
   document.addEventListener('DOMContentLoaded', function () {
@@ -305,6 +327,9 @@
 
   async function initializePayments() {
     try {
+      // Update pharmacist name in statistics card
+      document.getElementById('pharmacistName').textContent = currentUserName;
+      
       // Load statistics
       await loadStatistics();
       
@@ -452,6 +477,10 @@
       let canPrint = false;
       let canCancel = false;
       
+      // Cek permission berdasarkan role
+      const isPharmacist = currentUserRole === 'pharmacist';
+      const isAdmin = currentUserRole === 'admin';
+      
       switch(payment.payment_status) {
         case 'pending':
           paymentStatusBadge = `
@@ -460,8 +489,9 @@
               Belum Dibayar
             </span>
           `;
-          canProcess = payment.status === 'draft' || payment.status === 'process';
-          canCancel = true;
+          // Hanya apoteker dan admin yang bisa proses pembayaran
+          canProcess = (isPharmacist || isAdmin) && (payment.status === 'draft' || payment.status === 'process');
+          canCancel = isPharmacist || isAdmin;
           break;
         case 'paid':
           paymentStatusBadge = `
@@ -470,8 +500,8 @@
               Sudah Dibayar
             </span>
           `;
-          canView = true;
-          canPrint = payment.status === 'completed';
+          canView = isPharmacist || isAdmin;
+          canPrint = isPharmacist || isAdmin;
           break;
         case 'cancelled':
           paymentStatusBadge = `
@@ -480,7 +510,7 @@
               Dibatalkan
             </span>
           `;
-          canView = true;
+          canView = isPharmacist || isAdmin;
           break;
         default:
           paymentStatusBadge = `
@@ -491,10 +521,17 @@
           `;
       }
       
+      // Tampilkan nama apoteker jika sudah ada
+      const pharmacistName = payment.pharmacist_name ? 
+        `<span class="text-sm text-secondary">${payment.pharmacist_name}</span>` : 
+        `<span class="text-sm text-gray-400">Belum diproses</span>`;
+      
       html += `
         <tr class="border-b border-border hover:bg-muted/50 transition-all">
           <td class="px-6 py-4 text-sm text-foreground font-medium">${payment.prescription_number || '-'}</td>
           <td class="px-6 py-4 text-sm text-secondary">${payment.patient_name || '-'}</td>
+          <td class="px-6 py-4 text-sm text-secondary">${payment.doctor_name || '-'}</td>
+          <td class="px-6 py-4 text-sm">${pharmacistName}</td>
           <td class="px-6 py-4 text-sm text-secondary">${formattedDate}</td>
           <td class="px-6 py-4 text-sm">${prescriptionStatusBadge}</td>
           <td class="px-6 py-4 text-sm text-foreground font-medium text-right">${totalPrice}</td>
@@ -600,6 +637,12 @@
   // =============== PAYMENT MODAL ===============
   async function openPaymentModal(id) {
     try {
+      // Cek permission untuk apoteker dan admin
+      if (!['pharmacist', 'admin'].includes(currentUserRole)) {
+        showAlert('error', 'Anda tidak memiliki izin untuk memproses pembayaran');
+        return;
+      }
+      
       currentPaymentId = id;
       
       // Load payment data
@@ -629,6 +672,12 @@
           return;
         }
         
+        // Cek apakah sudah dibayar
+        if (result.data.payment_status === 'paid') {
+          showAlert('error', 'Resep ini sudah dibayar');
+          return;
+        }
+        
         populatePaymentModal(result.data);
         
         // Show modal
@@ -653,6 +702,7 @@
     document.getElementById('modalPrescriptionNumber').textContent = data.prescription_number || '-';
     document.getElementById('modalPatientName').textContent = data.patient_name || '-';
     document.getElementById('modalDoctorName').textContent = data.doctor_name || '-';
+    document.getElementById('modalPharmacistName').textContent = currentUserName;
     
     // Format examination date
     if (data.examination_date) {
@@ -767,7 +817,9 @@
       payment_amount: paymentAmount,
       payment_method: paymentMethod,
       payment_reference: document.getElementById('paymentReference').value,
-      payment_notes: document.getElementById('paymentNotes').value
+      payment_notes: document.getElementById('paymentNotes').value,
+      pharmacist_name: currentUserName,
+      pharmacist_id: currentUserId
     };
     
     // Disable submit button
@@ -797,7 +849,7 @@
       const result = await response.json();
       
       if (result.success) {
-        showAlert('success', 'Pembayaran berhasil diproses');
+        showAlert('success', 'Pembayaran berhasil diproses oleh ' + currentUserName);
         
         // Offer to print invoice
         if (confirm('Pembayaran berhasil! Apakah Anda ingin mencetak invoice?')) {
@@ -837,6 +889,12 @@
 
   async function printInvoice(id) {
     try {
+      // Cek permission untuk apoteker dan admin
+      if (!['pharmacist', 'admin'].includes(currentUserRole)) {
+        showAlert('error', 'Anda tidak memiliki izin untuk mencetak invoice');
+        return;
+      }
+      
       // Open PDF in new tab
       window.open(`/api/payments/invoice/${id}/pdf`, '_blank');
     } catch (error) {
@@ -847,6 +905,12 @@
 
   async function cancelPayment(id) {
     if (!confirm('Apakah Anda yakin ingin membatalkan pembayaran ini?')) {
+      return;
+    }
+    
+    // Cek permission untuk apoteker dan admin
+    if (!['pharmacist', 'admin'].includes(currentUserRole)) {
+      showAlert('error', 'Anda tidak memiliki izin untuk membatalkan pembayaran');
       return;
     }
     
@@ -865,7 +929,9 @@
         },
         body: JSON.stringify({ 
           id: id,
-          notes: notes 
+          notes: notes,
+          pharmacist_name: currentUserName,
+          pharmacist_id: currentUserId
         })
       });
       
@@ -876,7 +942,7 @@
       const result = await response.json();
       
       if (result.success) {
-        showAlert('success', 'Pembayaran berhasil dibatalkan');
+        showAlert('success', 'Pembayaran berhasil dibatalkan oleh ' + currentUserName);
         loadPayments();
         loadStatistics();
       } else {

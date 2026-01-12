@@ -132,7 +132,7 @@
           <div class="flex flex-col gap-4">
             <h3 class="font-medium text-sm text-secondary">Menu Utama</h3>
             <div class="flex flex-col gap-1">
-              <!-- Dashboard -->
+              <!-- Dashboard - Semua role bisa akses -->
               <a href="{{ route('dashboard') }}" class="group @if(request()->routeIs('dashboard')) active @endif cursor-pointer">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -142,7 +142,13 @@
                     class="font-medium text-secondary group-[.active]:font-semibold group-[.active]:text-foreground group-hover:text-foreground transition-all duration-300">Dashboard</span>
                 </div>
               </a>
-              <!-- E-Resep -->
+              
+              <!-- E-Resep (Hanya dokter dan admin) -->
+              @php
+                  $userRole = session('user.role') ?? '';
+              @endphp
+              
+              @if($userRole === 'doctor' || $userRole === 'admin')
               <a href="{{ route('prescriptions.index') }}" class="group @if(request()->routeIs('prescriptions.*')) active @endif cursor-pointer">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -152,7 +158,9 @@
                     class="font-medium text-secondary group-[.active]:font-semibold group-[.active]:text-foreground group-hover:text-foreground transition-all duration-300">E-Resep</span>
                 </div>
               </a>
-              <!-- Pasien -->
+              @endif
+              
+              <!-- Pasien (Sembunyikan dulu) -->
               <a href="{{ route('patients.index') }}" class="group @if(request()->routeIs('patients.*')) active @endif cursor-pointer" style="display: none">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -162,7 +170,8 @@
                     class="font-medium text-secondary group-[.active]:font-semibold group-[.active]:text-foreground group-hover:text-foreground transition-all duration-300">Pasien</span>
                 </div>
               </a>
-              <!-- Obat -->
+              
+              <!-- Obat (Sembunyikan dulu) -->
               <a href="{{ route('medications.index') }}" class="group @if(request()->routeIs('medications.*')) active @endif cursor-pointer" style="display: none">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -172,7 +181,9 @@
                     class="font-medium text-secondary group-[.active]:font-semibold group-[.active]:text-foreground group-hover:text-foreground transition-all duration-300">Obat</span>
                 </div>
               </a>
-              <!-- Pembayaran -->
+              
+              <!-- Pembayaran (Hanya apoteker dan admin) -->
+              @if($userRole === 'pharmacist' || $userRole === 'admin')
               <a href="{{ route('payments.index') }}" class="group @if(request()->routeIs('payments.*')) active @endif cursor-pointer">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -182,7 +193,9 @@
                     class="font-medium text-secondary group-[.active]:font-semibold group-[.active]:text-foreground group-hover:text-foreground transition-all duration-300">Pembayaran</span>
                 </div>
               </a>
-              <!-- Janji Temu -->
+              @endif
+              
+              <!-- Janji Temu (Sembunyikan dulu) -->
               <a href="#" class="group cursor-pointer" style="display: none">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -200,6 +213,7 @@
           <div class="flex flex-col gap-4">
             <h3 class="font-medium text-sm text-secondary">Manajemen</h3>
             <div class="flex flex-col gap-1">
+              <!-- Laporan (Semua role bisa akses) -->
               <a href="{{ route('reports.index') }}" class="group @if(request()->routeIs('reports.*')) active @endif cursor-pointer">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -209,6 +223,9 @@
                     class="font-medium text-secondary group-[.active]:font-semibold group-[.active]:text-foreground group-hover:text-foreground transition-all duration-300">Laporan</span>
                 </div>
               </a>
+              
+              <!-- Pengaturan (Hanya admin) -->
+              @if($userRole === 'admin')
               <a href="{{ route('settings.index') }}" class="group @if(request()->routeIs('settings.*')) active @endif cursor-pointer">
                 <div
                   class="flex items-center rounded-xl p-4 gap-3 bg-white group-[.active]:bg-muted group-hover:bg-muted transition-all duration-300">
@@ -218,6 +235,7 @@
                     class="font-medium text-secondary group-[.active]:font-semibold group-[.active]:text-foreground group-hover:text-foreground transition-all duration-300">Pengaturan</span>
                 </div>
               </a>
+              @endif
             </div>
           </div>
         </div>
@@ -226,8 +244,18 @@
         <div class="absolute bottom-0 left-0 w-[280px]">
           <div class="flex items-center justify-between border-t bg-white border-border p-5 gap-3">
             <div class="min-w-0 flex-1">
-              <p class="font-semibold text-foreground">{{ session('user.name') ?? 'Dr. Sarah Johnson' }}</p>
-              <p class="text-sm text-secondary">Dokter Umum</p>
+              <p class="font-semibold text-foreground">{{ session('user.name') ?? 'User' }}</p>
+              <p class="text-sm text-secondary">
+                @php
+                    $role = session('user.role') ?? '';
+                    $roleNames = [
+                        'doctor' => 'Dokter',
+                        'pharmacist' => 'Apoteker',
+                        'admin' => 'Administrator'
+                    ];
+                @endphp
+                {{ $roleNames[$role] ?? 'User' }}
+              </p>
             </div>
             <form method="POST" action="{{ route('logout') }}" class="inline" id="logoutForm">
               @csrf
@@ -258,8 +286,18 @@
           <div class="flex items-center gap-3">
             <div class="hidden md:flex items-center gap-3 pl-3 border-l border-border">
               <div class="text-right">
-                <p class="font-semibold text-foreground text-sm">{{ session('user.name') ?? 'Dr. Sarah Johnson' }}</p>
-                <p class="text-secondary text-xs">Dokter Umum</p>
+                <p class="font-semibold text-foreground text-sm">{{ session('user.name') ?? 'User' }}</p>
+                <p class="text-secondary text-xs">
+                  @php
+                      $role = session('user.role') ?? '';
+                      $roleNames = [
+                          'doctor' => 'Dokter',
+                          'pharmacist' => 'Apoteker',
+                          'admin' => 'Administrator'
+                      ];
+                  @endphp
+                  {{ $roleNames[$role] ?? 'User' }}
+                </p>
               </div>
               <div class="size-11 rounded-full object-cover ring-2 ring-border bg-primary/10 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="user" class="lucide lucide-user size-6 text-primary"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>

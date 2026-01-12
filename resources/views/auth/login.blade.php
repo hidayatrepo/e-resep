@@ -58,6 +58,30 @@
         </button>
       </form>
 
+      {{-- Tombol Login Cepat --}}
+      <div class="mt-6">
+        <p class="text-center text-sm text-gray-600 mb-3">Login cepat untuk testing:</p>
+        <div class="flex flex-col gap-2">
+          <button type="button" onclick="fillAndLogin('dokter', 'password123')" 
+            class="w-full px-4 py-2.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl font-medium hover:bg-blue-100 transition-all duration-200 flex items-center justify-center gap-2">
+            <i data-lucide="user-check" class="w-4 h-4"></i>
+            <span>Login sebagai Dokter</span>
+          </button>
+          
+          <button type="button" onclick="fillAndLogin('apoteker', 'password123')" 
+            class="w-full px-4 py-2.5 bg-green-50 text-green-700 border border-green-200 rounded-xl font-medium hover:bg-green-100 transition-all duration-200 flex items-center justify-center gap-2">
+            <i data-lucide="pill" class="w-4 h-4"></i>
+            <span>Login sebagai Apoteker</span>
+          </button>
+          
+          <button type="button" onclick="fillAndLogin('admin', 'password123')" 
+            class="w-full px-4 py-2.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl font-medium hover:bg-purple-100 transition-all duration-200 flex items-center justify-center gap-2">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            <span>Login sebagai Admin</span>
+          </button>
+        </div>
+      </div>
+
       <div class="mt-6 pt-6 border-t border-gray-200" style="display: none">
         <p class="text-center text-sm text-gray-600">
           Belum punya akun?
@@ -89,6 +113,32 @@
       });
     }
   });
+
+  // Fungsi untuk mengisi form login otomatis dan langsung submit
+  function fillAndLogin(username, password) {
+    document.getElementById('username').value = username;
+    document.getElementById('password').value = password;
+    
+    // Submit form secara otomatis
+    document.querySelector('form').submit();
+    
+    // Tampilkan loading
+    const loginBtn = document.getElementById('login-btn');
+    const loginSpinner = document.getElementById('login-spinner');
+    
+    loginBtn.disabled = true;
+    loginSpinner.classList.remove('hidden');
+    loginBtn.querySelector('span').textContent = 'Memproses...';
+  }
+
+  // Fungsi alternatif jika hanya ingin mengisi tanpa submit
+  function fillLogin(username, password) {
+    document.getElementById('username').value = username;
+    document.getElementById('password').value = password;
+    
+    // Fokus ke password field
+    document.getElementById('password').focus();
+  }
 </script>
 @endpush
 @endsection

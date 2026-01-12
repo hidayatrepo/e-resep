@@ -16,11 +16,16 @@
       <i data-lucide="download" class="w-4 h-4"></i>
       <span>Ekspor Data</span>
     </button>
+    @php
+      $userRole = session('user.role') ?? '';
+    @endphp
+    @if(in_array($userRole, ['doctor', 'admin']))
     <button onclick="openModal('add')"
       class="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-full font-medium hover:bg-primary-hover transition-all duration-200 cursor-pointer">
       <i data-lucide="plus" class="w-4 h-4"></i>
       <span>Resep Baru</span>
     </button>
+    @endif
   </div>
 </div>
 
@@ -396,6 +401,12 @@
   let medicinesData = [];
   let medicineCache = {}; // Cache untuk harga obat berdasarkan ID dan tanggal
   
+  // Session user data from PHP
+  const sessionUser = @json(session('user') ?? []);
+  const currentUserId = sessionUser?.id || 0;
+  const currentUserRole = sessionUser?.role || '';
+  const currentUserName = sessionUser?.name || 'Dr. Tidak Diketahui';
+  
   // =============== INITIALIZATION ===============
   document.addEventListener('DOMContentLoaded', function () {
     lucide.createIcons();
@@ -719,6 +730,10 @@
       let canEdit = false;
       let canDelete = false;
       
+      // Cek apakah user saat ini adalah pembuat resep atau admin
+      const isCreator = prescription.doctor_id == currentUserId;
+      const isAdmin = currentUserRole === 'admin';
+      
       switch(prescription.status) {
         case 'draft':
           statusBadge = `
@@ -727,8 +742,8 @@
               Draft
             </span>
           `;
-          canEdit = true;
-          canDelete = true;
+          canEdit = isCreator || isAdmin;
+          canDelete = isCreator || isAdmin;
           break;
         case 'process':
           statusBadge = `
@@ -737,8 +752,8 @@
               Proses
             </span>
           `;
-          canEdit = true;
-          canDelete = true;
+          canEdit = isCreator || isAdmin;
+          canDelete = isCreator || isAdmin;
           break;
         case 'completed':
           statusBadge = `
@@ -872,6 +887,12 @@
 
   // =============== MODAL FUNCTIONS ===============
   async function openModal(mode = 'add', id = null) {
+    // Check permission untuk add
+    if (mode === 'add' && !['doctor', 'admin'].includes(currentUserRole)) {
+      showAlert('error', 'Anda tidak memiliki izin untuk membuat resep baru');
+      return;
+    }
+    
     currentModalMode = mode;
     currentPrescriptionId = id;
     
@@ -904,13 +925,13 @@
       submitButtonText.textContent = 'Update Resep';
       // Tunggu data obat dimuat sebelum load data
       await loadMedicines();
-      loadPrescriptionData(id);
+      await loadPrescriptionData(id);
     } else if (mode === 'view' && id) {
       title.textContent = 'Detail Resep';
       submitButtonText.textContent = 'Tutup';
       // Tunggu data obat dimuat sebelum load data
       await loadMedicines();
-      loadPrescriptionData(id);
+      await loadPrescriptionData(id);
       // Disable all inputs for view mode
       document.querySelectorAll('#prescriptionForm input, #prescriptionForm textarea, #prescriptionForm select, #prescriptionForm button[type="button"]').forEach(el => {
         el.disabled = true;
@@ -959,6 +980,18 @@
       const result = await response.json();
       
       if (result.success) {
+        // Cek apakah user adalah pembuat resep atau admin untuk edit mode
+        if (currentModalMode === 'edit' || currentModalMode === 'view') {
+          const isCreator = result.data.doctor_id == currentUserId;
+          const isAdmin = currentUserRole === 'admin';
+          
+          if (currentModalMode === 'edit' && !isCreator && !isAdmin) {
+            showAlert('error', 'Anda tidak memiliki izin untuk mengedit resep ini');
+            closeModal();
+            return;
+          }
+        }
+        
         await populateForm(result.data);
       } else {
         showAlert('error', 'Gagal memuat data resep');
@@ -1178,8 +1211,9 @@
       formData.id = currentPrescriptionId;
     }
     
-    // Tambahkan field yang diperlukan untuk model
-    formData.doctor_name = 'Dr. Dokter Umum'; // Default, bisa diganti dengan input dokter
+    // Tambahkan field yang diperlukan untuk model dengan data dari session user
+    formData.doctor_name = currentUserName;
+    formData.doctor_id = currentUserId;
     formData.status = 'draft'; // Default status
     
     // Disable submit button
@@ -1327,10 +1361,29 @@
     }
     
     try {
-      // Gunakan CSRF token yang ada di meta tag atau buat baru
-      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                       document.querySelector('input[name="_token"]')?.value ||
-                       '{{ csrf_token() }}';
+      // Cek apakah user adalah pembuat resep atau admin
+      if (currentUserRole !== 'admin') {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         document.querySelector('input[name="_token"]')?.value ||
+                         '{{ csrf_token() }}';
+        
+        const checkResponse = await fetch('/api/prescriptions/get', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+          },
+          body: JSON.stringify({ id: id })
+        });
+        
+        if (checkResponse.ok) {
+          const checkResult = await checkResponse.json();
+          if (checkResult.success && checkResult.data.doctor_id != currentUserId) {
+            showAlert('error', 'Anda tidak memiliki izin untuk menghapus resep ini');
+            return;
+          }
+        }
+      }
       
       const response = await fetch('/api/prescriptions/delete', {
         method: 'POST',
