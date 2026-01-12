@@ -65,6 +65,9 @@ Route::middleware([CheckAuthenticated::class])->group(function () {
         
         // 4. DELETE - Hapus
         Route::post('/prescriptions/delete', [PrescriptionController::class, 'delete']);
+
+        // Route untuk medicine data
+        Route::post('/medicines/data', [PrescriptionController::class, 'getMedicineData']);
     });
 
         

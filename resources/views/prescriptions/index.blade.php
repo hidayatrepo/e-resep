@@ -394,19 +394,8 @@
   let totalPages = 1;
   let totalRecords = 0;
   let medicinesData = [];
+  let medicineCache = {}; // Cache untuk harga obat berdasarkan ID dan tanggal
   
-  // Dummy medicines data (in real app, fetch from API)
-  const dummyMedicines = [
-    { id: '1', name: 'Amoxicillin 500mg Tablet (AMOXSAN)', price: 5000 },
-    { id: '2', name: 'Paracetamol 500mg Tablet (SANMOL)', price: 3000 },
-    { id: '3', name: 'Metformin 500mg Tablet (DIABETA)', price: 4500 },
-    { id: '4', name: 'CTM 4mg Tablet', price: 2000 },
-    { id: '5', name: 'Ibuprofen 400mg Tablet', price: 3500 },
-    { id: '6', name: 'Omeprazole 20mg Capsule', price: 6000 },
-    { id: '7', name: 'Amlodipine 5mg Tablet', price: 5500 },
-    { id: '8', name: 'Glibenclamide 5mg Tablet', price: 4000 }
-  ];
-
   // =============== INITIALIZATION ===============
   document.addEventListener('DOMContentLoaded', function () {
     lucide.createIcons();
@@ -415,7 +404,7 @@
 
   async function initializeApp() {
     try {
-      // Load medicines data
+      // Load medicines data dari API
       await loadMedicines();
       
       // Set default date range
@@ -423,11 +412,6 @@
       
       // Load initial prescriptions
       await loadPrescriptions();
-      
-      // Initialize Select2
-      setTimeout(() => {
-        initializeSelect2();
-      }, 200);
       
       // Set up form submission
       setupFormSubmission();
@@ -462,11 +446,123 @@
   // =============== MEDICINES MANAGEMENT ===============
   async function loadMedicines() {
     try {
-      // In real app, fetch from API: /api/medicines
-      medicinesData = dummyMedicines;
+      // Ambil data obat dari API baru
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                       document.querySelector('input[name="_token"]')?.value ||
+                       '{{ csrf_token() }}';
+      
+      const response = await fetch('/api/medicines/data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({
+          action: 'list'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        medicinesData = result.medicines.map(medicine => ({
+          id: medicine.id,
+          name: medicine.name,
+          price: 0 // Harga akan diambil saat dipilih berdasarkan tanggal
+        }));
+        
+        // Initialize Select2 setelah data obat dimuat
+        setTimeout(() => {
+          initializeSelect2();
+        }, 200);
+        
+      } else {
+        throw new Error(result.message || 'Gagal memuat obat');
+      }
     } catch (error) {
       console.error('Error loading medicines:', error);
-      medicinesData = dummyMedicines;
+      showAlert('error', 'Gagal memuat daftar obat dari API. Menggunakan data lokal.');
+      
+      // Fallback ke dummy data
+      medicinesData = [
+        { id: '1', name: 'Amoxicillin 500mg Tablet (AMOXSAN)', price: 5000 },
+        { id: '2', name: 'Paracetamol 500mg Tablet (SANMOL)', price: 3000 },
+        { id: '3', name: 'Metformin 500mg Tablet (DIABETA)', price: 4500 },
+        { id: '4', name: 'CTM 4mg Tablet', price: 2000 },
+        { id: '5', name: 'Ibuprofen 400mg Tablet', price: 3500 },
+        { id: '6', name: 'Omeprazole 20mg Capsule', price: 6000 },
+        { id: '7', name: 'Amlodipine 5mg Tablet', price: 5500 },
+        { id: '8', name: 'Glibenclamide 5mg Tablet', price: 4000 }
+      ];
+      
+      // Initialize Select2 dengan data fallback
+      setTimeout(() => {
+        initializeSelect2();
+      }, 200);
+    }
+  }
+
+  // Function untuk mendapatkan harga obat berdasarkan tanggal
+  async function getMedicinePrice(medicineId, date = null) {
+    try {
+      if (!medicineId) return 0;
+      
+      // Gunakan tanggal pemeriksaan dari form atau tanggal sekarang
+      let targetDate = date;
+      if (!targetDate) {
+        const examDateInput = document.getElementById('examinationDate');
+        if (examDateInput && examDateInput.value) {
+          // Ambil hanya tanggalnya (YYYY-MM-DD)
+          targetDate = examDateInput.value.split('T')[0];
+        } else {
+          targetDate = new Date().toISOString().split('T')[0];
+        }
+      }
+      
+      // Check cache dulu
+      const cacheKey = `${medicineId}_${targetDate}`;
+      if (medicineCache[cacheKey]) {
+        return medicineCache[cacheKey];
+      }
+      
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                       document.querySelector('input[name="_token"]')?.value ||
+                       '{{ csrf_token() }}';
+      
+      const response = await fetch('/api/medicines/data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify({
+          action: 'price',
+          medicine_id: medicineId,
+          date: targetDate
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && result.price) {
+        // Simpan ke cache
+        medicineCache[cacheKey] = result.price.unit_price;
+        return result.price.unit_price;
+      } else {
+        console.warn('Harga tidak ditemukan untuk obat:', medicineId, 'pada tanggal:', targetDate);
+        return 0;
+      }
+    } catch (error) {
+      console.error('Error getting medicine price:', error);
+      return 0;
     }
   }
 
@@ -475,23 +571,57 @@
       if ($(select).hasClass('select2-hidden-accessible')) {
         $(select).select2('destroy');
       }
+      
       $(select).select2({
         placeholder: '-- Cari dan Pilih Obat --',
         allowClear: false,
         width: '100%',
         data: medicinesData.map(m => ({ 
           id: m.id, 
-          text: `${m.name} - Rp ${m.price.toLocaleString('id-ID')}`,
-          price: m.price 
+          text: m.name,
+          original_name: m.name
         })),
-        escapeMarkup: function (markup) { return markup; }
-      }).on('select2:select', function (e) {
-        // Set harga otomatis saat obat dipilih
+        escapeMarkup: function (markup) { return markup; },
+        templateResult: function(data) {
+          if (!data.id) {
+            return data.text;
+          }
+          const $result = $('<span></span>');
+          $result.text(data.text);
+          return $result;
+        },
+        templateSelection: function(data) {
+          return data.text;
+        }
+      }).on('select2:select', async function (e) {
+        // Ambil harga otomatis saat obat dipilih
         const selectedData = e.params.data;
         const row = $(this).closest('.flex.gap-3.items-end');
         const unitPriceInput = row.find('.unitPriceInput');
-        if (selectedData.price && !unitPriceInput.val()) {
-          unitPriceInput.val(selectedData.price);
+        
+        if (selectedData.id) {
+          // Tampilkan loading
+          const originalText = $(this).find('.select2-selection__rendered').text();
+          $(this).find('.select2-selection__rendered').html('<span class="text-gray-400">Mengambil harga...</span>');
+          
+          const price = await getMedicinePrice(selectedData.id);
+          
+          if (price > 0) {
+            unitPriceInput.val(price);
+            
+            // Update text di select untuk menampilkan harga
+            const newText = `${selectedData.original_name} - Rp ${price.toLocaleString('id-ID')}`;
+            $(this).find('.select2-selection__rendered').text(newText);
+            
+            // Update option text juga
+            const $option = $(this).find(`option[value="${selectedData.id}"]`);
+            if ($option.length) {
+              $option.text(newText);
+            }
+          } else {
+            // Jika harga tidak ditemukan, reset ke nama obat saja
+            $(this).find('.select2-selection__rendered').text(selectedData.original_name);
+          }
         }
       });
     });
@@ -741,7 +871,7 @@
   }
 
   // =============== MODAL FUNCTIONS ===============
-  function openModal(mode = 'add', id = null) {
+  async function openModal(mode = 'add', id = null) {
     currentModalMode = mode;
     currentPrescriptionId = id;
     
@@ -754,6 +884,9 @@
     document.getElementById('medicineList').innerHTML = '';
     document.getElementById('filePreview').innerHTML = '';
     
+    // Clear medicine cache saat modal dibuka
+    medicineCache = {};
+    
     // Re-enable all inputs
     document.querySelectorAll('#prescriptionForm input, #prescriptionForm textarea, #prescriptionForm select, #prescriptionForm button[type="button"]').forEach(el => {
       el.disabled = false;
@@ -763,14 +896,20 @@
       title.textContent = 'Resep Baru';
       submitButtonText.textContent = 'Simpan Resep';
       setCurrentDateTime();
+      // Tunggu data obat dimuat sebelum menambahkan row
+      await loadMedicines();
       addMedicineRow(); // Add initial medicine row
     } else if (mode === 'edit' && id) {
       title.textContent = 'Edit Resep';
       submitButtonText.textContent = 'Update Resep';
+      // Tunggu data obat dimuat sebelum load data
+      await loadMedicines();
       loadPrescriptionData(id);
     } else if (mode === 'view' && id) {
       title.textContent = 'Detail Resep';
       submitButtonText.textContent = 'Tutup';
+      // Tunggu data obat dimuat sebelum load data
+      await loadMedicines();
       loadPrescriptionData(id);
       // Disable all inputs for view mode
       document.querySelectorAll('#prescriptionForm input, #prescriptionForm textarea, #prescriptionForm select, #prescriptionForm button[type="button"]').forEach(el => {
@@ -784,9 +923,6 @@
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     lucide.createIcons();
-    setTimeout(() => {
-      initializeSelect2();
-    }, 100);
   }
 
   function setCurrentDateTime() {
@@ -823,7 +959,7 @@
       const result = await response.json();
       
       if (result.success) {
-        populateForm(result.data);
+        await populateForm(result.data);
       } else {
         showAlert('error', 'Gagal memuat data resep');
         closeModal();
@@ -835,7 +971,7 @@
     }
   }
 
-  function populateForm(data) {
+  async function populateForm(data) {
     // Set prescription ID
     document.getElementById('prescriptionId').value = data.id || '';
     
@@ -856,15 +992,15 @@
     // Clear and add medicines
     document.getElementById('medicineList').innerHTML = '';
     if (data.items && data.items.length > 0) {
-      data.items.forEach((item, index) => {
-        addMedicineRow(item, index === 0);
-      });
+      for (const item of data.items) {
+        await addMedicineRow(item);
+      }
     } else {
       addMedicineRow();
     }
   }
 
-  function addMedicineRow(medicineData = null, isFirst = false) {
+  async function addMedicineRow(medicineData = null) {
     const medicineList = document.getElementById('medicineList');
     const rowId = Date.now() + Math.random();
     
@@ -878,8 +1014,8 @@
         <select class="medicineSelect w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm" style="width: 100%">
           <option value="">-- Cari dan Pilih Obat --</option>
           ${medicinesData.map(m => `
-            <option value="${m.id}" data-price="${m.price}" ${medicineData && medicineData.medicine_id == m.id ? 'selected' : ''}>
-              ${m.name} - Rp ${m.price.toLocaleString('id-ID')}
+            <option value="${m.id}" ${medicineData && medicineData.medicine_id == m.id ? 'selected' : ''}>
+              ${m.name}
             </option>
           `).join('')}
         </select>
@@ -892,17 +1028,11 @@
       <div class="w-32">
         <label class="block text-xs font-medium text-secondary mb-2">Harga Satuan</label>
         <input type="number" class="unitPriceInput w-full px-3 py-2 rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-          placeholder="0" min="0" step="100" value="${medicineData ? medicineData.unit_price : '0'}">
+          placeholder="0" min="0" value="${medicineData ? medicineData.unit_price : '0'}">
       </div>
-      ${isFirst ? `
-        <button type="button" onclick="removeMedicineRow('${rowId}')" class="p-2 bg-error hover:bg-error-dark text-white rounded-full transition-all mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" class="lucide lucide-trash-2 w-4 h-4"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        </button>
-      ` : `
-        <button type="button" onclick="removeMedicineRow('${rowId}')" class="p-2 bg-error hover:bg-error-dark text-white rounded-full transition-all mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" class="lucide lucide-trash-2 w-4 h-4"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        </button>
-      `}
+      <button type="button" onclick="removeMedicineRow('${rowId}')" class="p-2 bg-error hover:bg-error-dark text-white rounded-full transition-all mb-2 h-fit">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" class="lucide lucide-trash-2 w-4 h-4"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      </button>
     `;
     
     medicineList.appendChild(row);
@@ -916,28 +1046,79 @@
         width: '100%',
         data: medicinesData.map(m => ({ 
           id: m.id, 
-          text: `${m.name} - Rp ${m.price.toLocaleString('id-ID')}`,
-          price: m.price 
+          text: m.name,
+          original_name: m.name
         })),
         escapeMarkup: function (markup) { return markup; }
-      }).on('select2:select', function (e) {
-        // Set harga otomatis saat obat dipilih
-        const selectedData = e.params.data;
-        const row = $(this).closest('.flex.gap-3.items-end');
-        const unitPriceInput = row.find('.unitPriceInput');
-        if (selectedData.price && !unitPriceInput.val()) {
-          unitPriceInput.val(selectedData.price);
-        }
       });
       
-      // Set initial price if medicine data provided
+      // Set initial price jika ada data
       if (medicineData && medicineData.medicine_id) {
         $(select).val(medicineData.medicine_id).trigger('change');
         const unitPriceInput = row.querySelector('.unitPriceInput');
-        if (medicineData.unit_price && !unitPriceInput.value) {
+        
+        // Jika sudah ada harga di data, gunakan itu
+        if (medicineData.unit_price) {
           unitPriceInput.value = medicineData.unit_price;
+          
+          // Update text di select dengan harga
+          const option = select.querySelector(`option[value="${medicineData.medicine_id}"]`);
+          if (option) {
+            const medicineName = medicinesData.find(m => m.id === medicineData.medicine_id)?.name || medicineData.medicine_name;
+            option.text = `${medicineName} - Rp ${medicineData.unit_price.toLocaleString('id-ID')}`;
+            $(select).trigger('change');
+          }
+        } else {
+          // Jika belum ada harga, ambil dari API berdasarkan tanggal pemeriksaan
+          setTimeout(async () => {
+            const examDate = document.getElementById('examinationDate').value;
+            const price = await getMedicinePrice(medicineData.medicine_id, examDate ? examDate.split('T')[0] : null);
+            if (price > 0) {
+              unitPriceInput.value = price;
+              // Update text di select
+              const option = select.querySelector(`option[value="${medicineData.medicine_id}"]`);
+              if (option) {
+                const medicineName = medicinesData.find(m => m.id === medicineData.medicine_id)?.name || medicineData.medicine_name;
+                option.text = `${medicineName} - Rp ${price.toLocaleString('id-ID')}`;
+                $(select).trigger('change');
+              }
+            }
+          }, 500);
         }
       }
+      
+      // Tambahkan event listener untuk ambil harga saat obat dipilih
+      $(select).on('select2:select', async function (e) {
+        const selectedData = e.params.data;
+        const row = $(this).closest('.flex.gap-3.items-end');
+        const unitPriceInput = row.find('.unitPriceInput');
+        
+        if (selectedData.id) {
+          // Tampilkan loading
+          const originalText = $(this).find('.select2-selection__rendered').text();
+          $(this).find('.select2-selection__rendered').html('<span class="text-gray-400">Mengambil harga...</span>');
+          
+          const examDate = document.getElementById('examinationDate').value;
+          const price = await getMedicinePrice(selectedData.id, examDate ? examDate.split('T')[0] : null);
+          
+          if (price > 0) {
+            unitPriceInput.val(price);
+            
+            // Update text di select untuk menampilkan harga
+            const newText = `${selectedData.original_name} - Rp ${price.toLocaleString('id-ID')}`;
+            $(this).find('.select2-selection__rendered').text(newText);
+            
+            // Update option text juga
+            const $option = $(this).find(`option[value="${selectedData.id}"]`);
+            if ($option.length) {
+              $option.text(newText);
+            }
+          } else {
+            // Jika harga tidak ditemukan, reset ke nama obat saja
+            $(this).find('.select2-selection__rendered').text(selectedData.original_name);
+          }
+        }
+      });
     }, 100);
   }
 
@@ -1075,9 +1256,15 @@
       const unitPriceInput = row.querySelector('.unitPriceInput');
       
       if (selectedOption && selectedOption.value && quantityInput && quantityInput.value && unitPriceInput && unitPriceInput.value) {
+        // Ambil nama obat tanpa harga
+        let medicineName = selectedOption.textContent;
+        if (medicineName.includes(' - Rp ')) {
+          medicineName = medicineName.split(' - Rp ')[0];
+        }
+        
         formData.items.push({
           medicine_id: selectedOption.value,
-          medicine_name: selectedOption.text.split(' - ')[0], // Get name without price
+          medicine_name: medicineName,
           quantity: parseInt(quantityInput.value),
           unit_price: parseFloat(unitPriceInput.value),
           unit: 'tablet',
@@ -1127,11 +1314,11 @@
 
   // =============== CRUD OPERATIONS ===============
   async function viewPrescription(id) {
-    openModal('view', id);
+    await openModal('view', id);
   }
 
   async function editPrescription(id) {
-    openModal('edit', id);
+    await openModal('edit', id);
   }
 
   async function deletePrescription(id) {
