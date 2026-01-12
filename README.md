@@ -1,5 +1,4 @@
 # 🏥 E-Resep — Sistem Peresepan Obat Digital
-**Laravel 12 | RS Delta Surya**
 
 Aplikasi web peresepan obat digital berbasis **Laravel 12** untuk mendukung proses pelayanan medis, mulai dari pembuatan resep oleh dokter hingga pembayaran di apotek.
 
