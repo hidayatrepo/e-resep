@@ -61,14 +61,14 @@ ____________________________
 🔐 Akun Default
 Gunakan akun ini untuk login setelah instalasi:
 
-Dokter
+Dokter (Membuat Resep)
 Username: dokter
 Password: password123
 
-Apoteker
+Apoteker (Memproses Pembayaran Resep)
 Username: apoteker
 Password: password123
 
-Administrator
+Administrator (Melihat laporan resep dari Dokter dan pembayaran oleh Apoteker)
 Username: admin
 Password: admin123
