@@ -12,7 +12,7 @@
   </div>
   <div class="flex items-center gap-2 md:gap-3 ml-auto md:ml-0">
     <button onclick="exportReport()"
-      class="flex items-center gap-2 px-4 py-2.5 ring-1 ring-border hover:ring-primary rounded-button text-foreground font-medium transition-all duration-200 cursor-pointer">
+      class="hidden flex items-center gap-2 px-4 py-2.5 ring-1 ring-border hover:ring-primary rounded-button text-foreground font-medium transition-all duration-200 cursor-pointer">
       <i data-lucide="download" class="w-4 h-4"></i>
       <span>Ekspor Data</span>
     </button>

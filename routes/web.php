@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ReportController;
 use App\Http\Middleware\CheckAuthenticated;
 
 // Redirect root to login
@@ -87,6 +88,10 @@ Route::middleware([CheckAuthenticated::class])->group(function () {
         
         // INVOICE - Cetak invoice PDF
         Route::get('/payments/invoice/{id}/pdf', [PaymentController::class, 'generateInvoice'])->name('payments.invoice');
-    });    
+    });
+    
+    // Reports routes - GANTI DENGAN CONTROLLER
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
 
 });
