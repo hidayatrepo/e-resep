@@ -60,7 +60,7 @@
     /* INFO GRID */
     .info-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 16px;
         font-size: 13px;
         margin-bottom: 20px;
@@ -204,13 +204,14 @@
                 <b>Apoteker</b>
                 {{ $prescription->pharmacist_name ?? '-' }}
             </div>
+            <div>   </div>
             <div>
                 <b>Tanggal Pemeriksaan</b>
-                {{ optional($prescription->examination_date)->format('d F Y H:i') ?? '-' }}
+                {{ $prescription->examination_date ? date('d F Y H:i', strtotime($prescription->examination_date)) : '-' }}
             </div>
             <div>
-                <b>Tanggal Dilayani</b>
-                {{ optional($prescription->served_at)->format('d F Y H:i') ?? '-' }}
+                <b>Tanggal Pembayaran</b>
+                {{ $prescription->served_at ? date('d F Y H:i', strtotime($prescription->served_at)) : '-' }}
             </div>
         </div>
 

@@ -216,6 +216,7 @@ class PaymentController extends Controller
             ];
 
             // Langsung return view (HTML)
+            // print("<pre>".print_r($data,true)."</pre>");
             return view('payments.invoice-pdf', $data);
 
         } catch (\Exception $e) {
