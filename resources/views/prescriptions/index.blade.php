@@ -416,7 +416,7 @@
   async function initializeApp() {
     try {
       // Load medicines data dari API
-      await loadMedicines();
+      // await loadMedicines();
       
       // Set default date range
       setDefaultDateRange();
